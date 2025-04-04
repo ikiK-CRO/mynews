@@ -83,6 +83,19 @@ export default function TestPage() {
   const formatResults = (results: ApiResult | null) => {
     if (!results) return null;
     
+    // Create a sanitized copy of the first article to prevent hydration issues
+    let firstArticle = null;
+    
+    if (results.articles?.length > 0) {
+      // Create a deep copy of the article
+      firstArticle = JSON.parse(JSON.stringify(results.articles[0]));
+      
+      // Ensure image URLs are properly formatted to prevent hydration errors
+      if (firstArticle.imageUrl && !firstArticle.imageUrl.startsWith('http')) {
+        firstArticle.imageUrl = `https://www.nytimes.com${firstArticle.imageUrl}`;
+      }
+    }
+    
     return (
       <div className="results">
         <p>Total results: {results.totalResults}</p>
@@ -93,7 +106,7 @@ export default function TestPage() {
           <div>
             <h3>First article:</h3>
             <pre className="json-box">
-              {JSON.stringify(results.articles[0], null, 2)}
+              {JSON.stringify(firstArticle, null, 2)}
             </pre>
           </div>
         )}

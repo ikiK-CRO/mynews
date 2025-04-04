@@ -5,6 +5,13 @@ import Link from 'next/link';
 import { useArticles } from './hooks/useArticles';
 import { NewsCategory } from './lib/api';
 
+// Helper function to ensure image URLs are properly formatted
+const getFormattedImageUrl = (url: string | null): string | undefined => {
+  if (!url) return undefined;
+  if (url.startsWith('http')) return url;
+  return `https://www.nytimes.com${url}`;
+};
+
 // Placeholder component - this will be replaced with proper UI components matching Figma
 export default function Home() {
   const { 
@@ -89,7 +96,7 @@ export default function Home() {
             <div key={article.id} className="article-card">
               {article.imageUrl && (
                 <div className="article-image">
-                  <img src={article.imageUrl} alt={article.title} />
+                  <img src={getFormattedImageUrl(article.imageUrl)} alt={article.title} />
                 </div>
               )}
               <div className="article-content">
