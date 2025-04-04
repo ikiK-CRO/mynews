@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function SignIn() {
     return (
-        <div style={{ padding: '2rem' }}>
+        <div className="container">
             <h1>Sign In</h1>
             <form>
                 <div>
