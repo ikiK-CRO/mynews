@@ -1,18 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useEffect } from 'react';
 import { useArticles } from './hooks/useArticles';
 import { NewsCategory } from './lib/api';
+import Layout from '@/components/layout/Layout';
+import ArticleCard from '@/components/news/ArticleCard';
 
-// Helper function to ensure image URLs are properly formatted
-const getFormattedImageUrl = (url: string | null): string | undefined => {
-  if (!url) return undefined;
-  if (url.startsWith('http')) return url;
-  return `https://www.nytimes.com${url}`;
-};
-
-// Placeholder component - this will be replaced with proper UI components matching Figma
 export default function Home() {
   const { 
     articles, 
@@ -27,18 +20,24 @@ export default function Home() {
     pageSize: 10
   });
 
-  const [searchInput, setSearchInput] = useState('');
-  
-  // Handle search input with simple debounce
+  // Listen for category and search changes from the Layout
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchInput !== undefined) {
-        setQuery(searchInput);
-      }
-    }, 500);
+    const handleCategoryChange = (e: CustomEvent<NewsCategory>) => {
+      setCategory(e.detail);
+    };
     
-    return () => clearTimeout(timer);
-  }, [searchInput, setQuery]);
+    const handleSearchQuery = (e: CustomEvent<string>) => {
+      setQuery(e.detail);
+    };
+    
+    window.addEventListener('category-change', handleCategoryChange as EventListener);
+    window.addEventListener('search-query', handleSearchQuery as EventListener);
+    
+    return () => {
+      window.removeEventListener('category-change', handleCategoryChange as EventListener);
+      window.removeEventListener('search-query', handleSearchQuery as EventListener);
+    };
+  }, [setCategory, setQuery]);
   
   // Simple infinite scroll detection
   useEffect(() => {
@@ -58,79 +57,29 @@ export default function Home() {
   }, [hasMore, loading, loadMore]);
 
   return (
-    <div className="container">
-      <header>
-        <h1>MyNews</h1>
+    <Layout latestArticles={articles.slice(0, 5)}>
+      <section className="news-section">
+        <h2 className="section-heading">Latest News</h2>
         
-        <div className="search-container">
-          <input
-            type="text"
-            placeholder="Search news"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-          />
-          <button>Search</button>
-        </div>
-        
-        <nav>
-          <ul className="category-nav">
-            {Object.values(NewsCategory).map(category => (
-              <li key={category}>
-                <button 
-                  onClick={() => setCategory(category as NewsCategory)}
-                  className="category-button"
-                >
-                  {category.charAt(0).toUpperCase() + category.slice(1)}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </header>
-
-      <main>
         {error && <div className="error-message">Error: {error.message}</div>}
         
         <div className="articles-grid">
-          {articles.map(article => (
-            <div key={article.id} className="article-card">
-              {article.imageUrl && (
-                <div className="article-image">
-                  <img src={getFormattedImageUrl(article.imageUrl)} alt={article.title} />
-                </div>
-              )}
-              <div className="article-content">
-                <span className="article-category">{article.category.toUpperCase()}</span>
-                <h2 className="article-title">{article.title}</h2>
-                <p className="article-description">{article.description}</p>
-                <div className="article-meta">
-                  <span>{article.source}</span>
-                  <span>{new Date(article.publishedAt).toLocaleDateString()}</span>
-                </div>
-                <a href={article.url} target="_blank" rel="noopener noreferrer" className="read-more">
-                  Read more
-                </a>
-              </div>
-            </div>
+          {articles.map((article, index) => (
+            <ArticleCard 
+              key={article.id} 
+              article={article}
+              featured={index === 0}
+              breaking={index === 1}
+            />
           ))}
         </div>
         
         {loading && <div className="loading">Loading more articles...</div>}
         
-        {!hasMore && !loading && (
+        {!hasMore && !loading && articles.length > 0 && (
           <div className="no-more-results">No more articles to load</div>
         )}
-      </main>
-
-      <nav>
-        <Link href="/signin">
-          Sign In
-        </Link>{' '}
-        |{' '}
-        <Link href="/signup">
-          Sign Up
-        </Link>
-      </nav>
-    </div>
+      </section>
+    </Layout>
   );
 }

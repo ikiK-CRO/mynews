@@ -1,24 +1,31 @@
 @use 'variables' as v;
+@use 'mixins' as m;
 @use 'fonts';
+
+// Import component styles using @use instead of @import
+@use 'components/article-card';
+@use 'components/mobile-menu';
+@use 'components/news-list';
+@use 'components/sidebar';
 
 // Theme variables
 :root {
   --background: #{v.$background-light};
   --foreground: #{v.$foreground-light};
-  --card-background: #fff;
-  --border-color: #e5e5e5;
-  --accent-color: #C43C3C;
-  --secondary-text: #666;
-  --category-bg: #f2f2f2;
+  --card-background: #{v.$white};
+  --border-color: #{v.$gray};
+  --accent-color: #{v.$brand-primary};
+  --secondary-text: #{v.$dark-gray};
+  --category-bg: #{v.$light-gray};
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #{v.$background-dark};
     --foreground: #{v.$foreground-dark};
-    --card-background: #1a1a1a;
+    --card-background: #{v.$very-dark-gray};
     --border-color: #333;
-    --accent-color: #C43C3C;
+    --accent-color: #{v.$brand-primary};
     --secondary-text: #aaa;
     --category-bg: #333;
   }
@@ -40,7 +47,7 @@ html, body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: 'Inter', Arial, sans-serif;
+  font-family: v.$font-family-base;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -49,44 +56,92 @@ a {
   text-decoration: none;
 }
 
+ul, ol {
+  list-style: none;
+}
+
 // Layout
 .container {
-  padding: 2rem;
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+  padding: 0 v.$spacing-4;
+  
+  @include m.tablet-up {
+    padding: 0 v.$spacing-6;
+  }
+  
+  @include m.desktop-up {
+    padding: 0 v.$spacing-8;
+  }
 }
 
 // Header styles
-header {
-  margin-bottom: 2rem;
+.site-header {
+  padding: v.$spacing-4 0;
+  border-bottom: 1px solid var(--border-color);
   
-  h1 {
-    color: var(--accent-color);
-    font-size: 2.5rem;
-    margin-bottom: 1.5rem;
+  .header-content {
+    @include m.flex-between;
   }
   
-  .search-container {
-    display: flex;
-    margin-bottom: 1rem;
+  .brand {
+    font-weight: v.$font-weight-bold;
+    font-size: v.$font-size-xl;
+    color: v.$brand-primary;
+  }
+  
+  .navigation {
+    display: none;
     
-    input {
-      flex: 1;
-      padding: 0.75rem;
-      border: 1px solid var(--border-color);
-      border-right: none;
-      border-radius: 4px 0 0 4px;
-      background: var(--card-background);
-      color: var(--foreground);
+    @include m.desktop-up {
+      display: flex;
+      gap: v.$spacing-6;
     }
+  }
+  
+  .menu-toggle {
+    @include m.button-reset;
     
-    button {
-      padding: 0.75rem 1.5rem;
-      background: var(--accent-color);
-      color: white;
-      border: none;
-      border-radius: 0 4px 4px 0;
-      cursor: pointer;
+    @include m.desktop-up {
+      display: none;
+    }
+  }
+}
+
+// Search bar
+.search-container {
+  margin: v.$spacing-4 0;
+  position: relative;
+  
+  @include m.tablet-up {
+    display: flex;
+  }
+  
+  input {
+    @include m.input-style;
+    border-radius: v.$border-radius-sm;
+    
+    @include m.tablet-up {
+      border-right: none;
+      border-radius: v.$border-radius-sm 0 0 v.$border-radius-sm;
+    }
+  }
+  
+  button {
+    width: 100%;
+    margin-top: v.$spacing-2;
+    padding: v.$spacing-3;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: v.$border-radius-sm;
+    cursor: pointer;
+    
+    @include m.tablet-up {
+      width: auto;
+      margin-top: 0;
+      border-radius: 0 v.$border-radius-sm v.$border-radius-sm 0;
     }
   }
 }
@@ -94,30 +149,26 @@ header {
 // Category navigation
 .category-nav {
   display: flex;
-  list-style-type: none;
+  flex-wrap: nowrap;
   overflow-x: auto;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
+  gap: v.$spacing-2;
+  padding-bottom: v.$spacing-4;
+  margin-bottom: v.$spacing-6;
   
-  li {
-    margin-right: 0.5rem;
+  &::-webkit-scrollbar {
+    display: none;
   }
   
   .category-button {
+    @include m.button-reset;
+    white-space: nowrap;
+    padding: v.$spacing-2 v.$spacing-4;
     background: var(--category-bg);
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    cursor: pointer;
-    color: var(--foreground);
-    font-weight: 500;
+    border-radius: v.$border-radius-full;
+    font-size: v.$font-size-sm;
+    font-weight: v.$font-weight-medium;
     
-    &:hover, &:focus {
-      background: var(--accent-color);
-      color: white;
-    }
-    
-    &.active {
+    &:hover, &:focus, &.active {
       background: var(--accent-color);
       color: white;
     }
@@ -127,90 +178,40 @@ header {
 // Articles grid
 .articles-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-.article-card {
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  background: var(--card-background);
-  transition: transform 0.2s ease-in-out;
+  grid-template-columns: 1fr;
+  gap: v.$spacing-6;
   
-  &:hover {
-    transform: translateY(-5px);
+  @include m.tablet-up {
+    grid-template-columns: repeat(2, 1fr);
   }
   
-  .article-image {
-    height: 200px;
-    overflow: hidden;
-    
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  }
-  
-  .article-content {
-    padding: 1.5rem;
-  }
-  
-  .article-category {
-    display: inline-block;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--accent-color);
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  
-  .article-title {
-    font-size: 1.25rem;
-    margin-bottom: 0.75rem;
-    line-height: 1.4;
-  }
-  
-  .article-description {
-    font-size: 0.875rem;
-    color: var(--secondary-text);
-    margin-bottom: 1rem;
-    line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  
-  .article-meta {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.75rem;
-    color: var(--secondary-text);
-    margin-bottom: 1rem;
-  }
-  
-  .read-more {
-    display: inline-block;
-    color: var(--accent-color);
-    font-weight: 600;
-    font-size: 0.875rem;
-    
-    &:hover {
-      text-decoration: underline;
-    }
+  @include m.desktop-up {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
-// Loading and error states
+// Category badges
+@each $category, $color in (
+  'general': v.$category-general,
+  'technology': v.$category-technology,
+  'business': v.$category-business,
+  'health': v.$category-health,
+  'sports': v.$category-sports,
+  'science': v.$category-science,
+  'entertainment': v.$category-entertainment
+) {
+  .category-badge.#{$category} {
+    @include m.category-badge($color);
+  }
+}
+
+// Utility classes
 .loading, 
 .error-message, 
 .no-more-results {
   text-align: center;
-  padding: 2rem;
-  font-size: 0.875rem;
+  padding: v.$spacing-8;
+  font-size: v.$font-size-sm;
   color: var(--secondary-text);
 }
 
@@ -218,61 +219,12 @@ header {
   color: var(--accent-color);
 }
 
-// Forms
-form {
-  margin: 1.5rem 0;
-}
-
-form div {
-  margin-bottom: 1rem;
-}
-
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-}
-
-input {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-button {
-  background: var(--foreground);
-  color: var(--background);
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 1rem;
-}
-
-// Dark mode preference
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-  
-  input {
-    background-color: #333;
-    border-color: #555;
-    color: white;
-  }
-}
-
-// Responsive adjustments
-@media (max-width: 768px) {
-  .container {
-    padding: 1rem;
-  }
-  
-  .articles-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  header h1 {
-    font-size: 2rem;
-  }
+.breaking-label {
+  background-color: v.$brand-primary;
+  color: white;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-bold;
+  padding: v.$spacing-1 v.$spacing-2;
+  border-radius: v.$border-radius-sm;
+  text-transform: uppercase;
 }

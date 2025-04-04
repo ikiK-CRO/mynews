@@ -1,0 +1,119 @@
+@use '../variables' as v;
+@use '../mixins' as m;
+
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: 320px;
+  background: var(--card-background);
+  z-index: v.$z-index-modal;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  
+  &.active {
+    transform: translateX(0);
+  }
+  
+  .menu-header {
+    @include m.flex-between;
+    padding: v.$spacing-4;
+    border-bottom: 1px solid var(--border-color);
+    
+    .brand {
+      font-weight: v.$font-weight-bold;
+      font-size: v.$font-size-xl;
+      color: v.$brand-primary;
+    }
+    
+    .close-menu {
+      @include m.button-reset;
+      font-size: v.$font-size-2xl;
+    }
+  }
+  
+  .menu-search {
+    padding: v.$spacing-4;
+    border-bottom: 1px solid var(--border-color);
+    
+    input {
+      @include m.input-style;
+    }
+  }
+  
+  .menu-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: v.$spacing-4;
+  }
+  
+  .menu-categories {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: v.$spacing-4;
+    margin-bottom: v.$spacing-6;
+    
+    .category-item {
+      @include m.flex-center;
+      flex-direction: column;
+      text-align: center;
+      padding: v.$spacing-4;
+      border-radius: v.$border-radius-md;
+      background: var(--category-bg);
+      transition: background-color 0.2s ease;
+      
+      &:hover {
+        background: var(--accent-color);
+        color: white;
+      }
+      
+      .category-icon {
+        margin-bottom: v.$spacing-2;
+        font-size: v.$font-size-xl;
+      }
+      
+      .category-label {
+        font-size: v.$font-size-sm;
+        font-weight: v.$font-weight-medium;
+      }
+    }
+  }
+  
+  .menu-links {
+    margin-top: v.$spacing-6;
+    
+    .menu-link {
+      display: block;
+      padding: v.$spacing-3 0;
+      border-bottom: 1px solid var(--border-color);
+      font-weight: v.$font-weight-medium;
+      
+      &:hover {
+        color: var(--accent-color);
+      }
+    }
+  }
+}
+
+.menu-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: v.$z-index-modal-backdrop;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  
+  &.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+} 
